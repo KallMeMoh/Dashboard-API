@@ -44,11 +44,17 @@ router.post(
       const hashedPassword = await bcrypt.hash(password, salt);
 
       const user = new User({ username, password: hashedPassword });
-
       await user.save();
 
       const accessToken = generateAccessToken(user._id);
-      const refreshToken = generateRefreshToken(user._id);
+      const refreshTokenString = generateRefreshToken(user._id);
+
+      const refreshToken = new RefreshToken({
+        userId: user._id,
+        token: refreshTokenString,
+        expiry: Date.now() + ms(config.jwt.refreshTokenExpiry),
+      });
+      await refreshToken.save();
 
       res.status(200).json({ accessToken, refreshToken });
     } catch (error) {
