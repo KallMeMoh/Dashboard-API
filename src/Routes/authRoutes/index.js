@@ -52,7 +52,7 @@ router.post(
 
       res.status(200).json({ accessToken, refreshToken });
     } catch (error) {
-      res.status(400).send(error);
+      res.status(400).send({ error: "err" });
     }
   },
 );
