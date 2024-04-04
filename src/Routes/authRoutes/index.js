@@ -97,11 +97,6 @@ router.post(
 );
 
 router.post("/refresh-token", async (req, res) => {
-  const { refreshToken } = req.body;
-
-  if (!refreshToken)
-    return res.status(400).json({ message: "Missing refresh token" });
-
   if (
     !req.headers.authorization ||
     !req.headers.authorization.startsWith("Bearer ")
@@ -110,10 +105,13 @@ router.post("/refresh-token", async (req, res) => {
       .status(401)
       .json({ message: "Missing or malformed authorization header" });
 
-  const token = req.headers.authorization.split(" ")[1];
+  const refreshToken = req.headers.authorization.split(" ")[1];
+  
+  if (!refreshToken)
+    return res.status(400).json({ message: "Missing refresh token" });
 
   try {
-    const decoded = jwt.verify(token, config.jwt.refreshSecret);
+    const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret);
 
     const refreshTokenDoc = await RefreshToken.findOne({
       userId: decoded.userId,
@@ -139,11 +137,6 @@ router.post("/refresh-token", async (req, res) => {
 });
 
 router.post("/logout", async (req, res) => {
-  const { refreshToken } = req.body;
-
-  if (!refreshToken)
-    return res.status(400).json({ message: "Missing refresh token" });
-
   if (
     !req.headers.authorization ||
     !req.headers.authorization.startsWith("Bearer ")
@@ -152,10 +145,13 @@ router.post("/logout", async (req, res) => {
       .status(401)
       .json({ message: "Missing or malformed authorization header" });
 
-  const token = req.headers.authorization.split(" ")[1];
+  const refreshToken = req.headers.authorization.split(" ")[1];
+
+  if (!refreshToken)
+    return res.status(400).json({ message: "Missing refresh token" });
 
   try {
-    const decoded = jwt.verify(token, config.jwt.refreshSecret);
+    const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret);
 
     const refreshTokenDoc = await RefreshToken.findOne({
       userId: decoded.userId,
