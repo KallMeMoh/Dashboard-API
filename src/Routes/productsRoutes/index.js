@@ -34,7 +34,7 @@ const authenticateJWT = (req, res, next) => {
 router.get("/", async (req, res) => {
   const products = await Product.find();
 
-  res.status(200).send({ products: products });
+  res.status(200).send({ products });
 });
 
 router.get("/:id", async (req, res) => {
@@ -42,34 +42,26 @@ router.get("/:id", async (req, res) => {
   if (!product) {
     return res.status(404).send({ message: "Product not found" });
   }
-  res.status(200).send({ product });
+  res.status(200).send(product);
 });
 
-// PROTECTED PRODUCTS ROUTES
-/*
-NOTE FOR ME: 
-  Remember to always check if the user data exists in your database
-  before proceeding with any operations. This is to ensure that the
-  user is still valid and has not been deleted from the database after
-  the token was issued.
-*/
 router.post("/", authenticateJWT, async (req, res) => {
-  const newProduct = new Product(req.body);
-  const savedProduct = await newProduct.save();
-  res.status(201).send({ product: savedProduct });
+  const product = new Product(req.body);
+  await product.save();
+  res.status(201).send(product);
 });
 
 router.put("/:id", authenticateJWT, async (req, res) => {
-  const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  if (!updatedProduct) {
+  const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (!product) {
     return res.status(404).send({ message: "Product not found" });
   }
-  res.status(200).send({ product: updatedProduct });
+  res.status(200).send(product);
 });
 
 router.delete("/:id", authenticateJWT, async (req, res) => {
-  const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-  if (!deletedProduct) {
+  const product = await Product.findByIdAndDelete(req.params.id);
+  if (!product) {
     return res.status(404).send({ message: "Product not found" });
   }
   res.status(200).send({ message: "Product deleted" });

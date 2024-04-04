@@ -32,8 +32,9 @@ const authenticateJWT = (req, res, next) => {
 };
 
 router.get("/", async (req, res) => {
-  const categories = await Category.find({});
-  res.json(categories);
+  const categories = await Category.find();
+
+  res.status(200).send({ categories });
 });
 
 router.get("/:id", async (req, res) => {
@@ -46,7 +47,7 @@ router.get("/:id", async (req, res) => {
 
 router.get("/:id/products", async (req, res) => {
   const products = await Product.find({ category: req.params.id });
-  res.json(products);
+  res.json({ products });
 });
 
 router.post("/", authenticateJWT, async (req, res) => {
