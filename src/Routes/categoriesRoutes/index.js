@@ -31,39 +31,44 @@ const authenticateJWT = (req, res, next) => {
   });
 };
 
-router.get("/", (req, res) => {
-  // GET /api/v1/categories
-  // GET /categories: Retrieves a list of all categories.
+router.get("/", async (req, res) => {
+  const categories = await Category.find({});
+  res.json(categories);
 });
 
-router.get("/:id", (req, res) => {
-  // GET /api/v1/categories/:id
-  // GET /categories/:id: Retrieves a specific category by ID.
+router.get("/:id", async (req, res) => {
+  const category = await Category.findById(req.params.id);
+  if (!category) {
+    return res.status(404).json({ message: "Category not found" });
+  }
+  res.json(category);
 });
 
-router.get("/:id/products", (req, res) => {
-  // GET /api/v1/categories
-  // GET /categories: Retrieves a list of all products in a categoy by ID.
+router.get("/:id/products", async (req, res) => {
+  const products = await Product.find({ category: req.params.id });
+  res.json(products);
 });
 
-// PROTECTED categories ROUTES
-/*
-NOTE FOR ME: 
-  Remember to always check if the user data exists in your database
-  before proceeding with any operations. This is to ensure that the
-  user is still valid and has not been deleted from the database after
-  the token was issued.
-*/
-router.post("/", authenticateJWT, (req, res) => {
-  // POST /categories: Creates a new product (requires authentication for admin users).
+router.post("/", authenticateJWT, async (req, res) => {
+  const category = new Category(req.body);
+  await category.save();
+  res.status(201).json(category);
 });
 
-router.put("/:id", authenticateJWT, (req, res) => {
-  // PUT /categories/:id: Updates an existing product (requires authentication for admin users).
+router.put("/:id", authenticateJWT, async (req, res) => {
+  const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (!category) {
+    return res.status(404).json({ message: "Category not found" });
+  }
+  res.json(category);
 });
 
-router.delete("/:id", authenticateJWT, (req, res) => {
-  // DELETE /categories/:id: Deletes a product (requires authentication for admin users).
+router.delete("/:id", authenticateJWT, async (req, res) => {
+  const category = await Category.findByIdAndDelete(req.params.id);
+  if (!category) {
+    return res.status(404).json({ message: "Category not found" });
+  }
+  res.json({ message: "Category deleted" });
 });
 
 module.exports = router;
