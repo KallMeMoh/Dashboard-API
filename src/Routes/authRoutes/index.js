@@ -28,7 +28,7 @@ router.post(
       .isLength({ min: 5 })
       .withMessage("Username must be at least 5 characters long"),
     body('password')
-      .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)
+      .matches(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/)
       .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number, and be at least 8 characters long')
   ],
   async (req, res) => {
@@ -75,7 +75,7 @@ router.post(
   [
     body("username").exists().withMessage("Username is required"),
     body('password')
-      .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)
+      .matches(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/)
       .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number, and be at least 8 characters long')
   ],
   async (req, res) => {
