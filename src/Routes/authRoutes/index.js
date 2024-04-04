@@ -156,28 +156,17 @@ router.post("/logout", async (req, res) => {
     return res.status(401).json({ message: "Missing refresh token" });
 
   try {
-    const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret);
+    // Delete the refresh token directly
+    const result = await RefreshToken.deleteOne({ token: refreshToken });
 
-    const refreshTokenDoc = await RefreshToken.findOne({
-      userId: decoded.userId,
-    });
-    if (!refreshTokenDoc)
+    if (result.deletedCount === 0) {
       return res.status(401).json({ message: "Invalid refresh token" });
+    }
 
-    if (refreshToken !== refreshTokenDoc.token)
-      return res.status(401).json({ message: "Invalid refresh token" });
-
-    await refreshTokenDoc.deleteOne();
     res.json({ message: "Logged out successfully" });
   } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      res.status(401).json({ message: "Refresh token expired" });
-    } else if (error instanceof jwt.JsonWebTokenError) {
-      res.status(401).json({ message: "Invalid refresh token" });
-    } else {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
-    }
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
