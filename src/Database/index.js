@@ -1,5 +1,6 @@
 const { Schema, model, connect } = require("mongoose");
 const { mongoose } = require("../config.js");
+const bcrypt = require('bcrypt');
 
 connect(mongoose.URI);
 
@@ -58,8 +59,8 @@ const productSchema = new Schema({
   },
 });
 
-userSchema.pre("save", async (next) => {
-  if (this.isModified("password")) {
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
   }
