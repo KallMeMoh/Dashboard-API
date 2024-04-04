@@ -31,8 +31,10 @@ const authenticateJWT = (req, res, next) => {
   });
 };
 
-router.get("/", (req, res) => {
-  // GET /api/v1/products
+router.get("/", async (req, res) => {
+  const products = await Product.find();
+
+  res.status(200).send({ products: products });
   // GET /products: Retrieves a list of all products.
 });
 
