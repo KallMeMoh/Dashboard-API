@@ -102,18 +102,17 @@ router.post(
 );
 
 router.post("/refresh-token", async (req, res) => {
-  if (
-    !req.headers.authorization ||
-    !req.headers.authorization.startsWith("Bearer ")
-  )
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer "))
     return res
       .status(401)
       .json({ message: "Missing or malformed authorization header" });
 
-  const refreshToken = req.headers.authorization.split(" ")[1];
+  const refreshToken = authHeader.split(" ")[1];
   
   if (!refreshToken)
-    return res.status(400).json({ message: "Missing refresh token" });
+    return res.status(401).json({ message: "Missing refresh token" });
 
   try {
     const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret);
@@ -123,11 +122,6 @@ router.post("/refresh-token", async (req, res) => {
     });
     if (!refreshTokenDoc)
       return res.status(401).json({ message: "Invalid refresh token" });
-
-    if (refreshTokenDoc.expiry < Date.now()) {
-      await refreshTokenDoc.deleteOne();
-      return res.status(401).json({ message: "Refresh token expired" });
-    }
 
     if (refreshToken !== refreshTokenDoc.token)
       return res.status(401).json({ message: "Invalid refresh token" });
@@ -136,24 +130,30 @@ router.post("/refresh-token", async (req, res) => {
 
     res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    if (error instanceof jwt.TokenExpiredError) {
+      await RefreshToken.deleteOne({ token: refreshToken });
+      res.status(401).json({ message: "Refresh token expired" });
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({ message: "Invalid refresh token" });
+    } else {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    }
   }
 });
 
 router.post("/logout", async (req, res) => {
-  if (
-    !req.headers.authorization ||
-    !req.headers.authorization.startsWith("Bearer ")
-  )
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer "))
     return res
       .status(401)
       .json({ message: "Missing or malformed authorization header" });
 
-  const refreshToken = req.headers.authorization.split(" ")[1];
-
+  const refreshToken = authHeader.split(" ")[1];
+  
   if (!refreshToken)
-    return res.status(400).json({ message: "Missing refresh token" });
+    return res.status(401).json({ message: "Missing refresh token" });
 
   try {
     const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret);
@@ -164,19 +164,20 @@ router.post("/logout", async (req, res) => {
     if (!refreshTokenDoc)
       return res.status(401).json({ message: "Invalid refresh token" });
 
-    if (refreshTokenDoc.expiry < Date.now()) {
-      await refreshTokenDoc.deleteOne();
-      return res.status(401).json({ message: "Refresh token expired" });
-    }
-
     if (refreshToken !== refreshTokenDoc.token)
       return res.status(401).json({ message: "Invalid refresh token" });
 
     await refreshTokenDoc.deleteOne();
     res.json({ message: "Logged out successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({ message: "Refresh token expired" });
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({ message: "Invalid refresh token" });
+    } else {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    }
   }
 });
 
