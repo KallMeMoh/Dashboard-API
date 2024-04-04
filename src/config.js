@@ -1,4 +1,5 @@
 module.exports = {
+  port: 5000,
   mongoose: {
     URI: `mongodb+srv://koolmoh:${process.env.DB_PASSWORD}@test-cluster.wdeytlr.mongodb.net/?retryWrites=true&w=majority&appName=Test-Cluster`,
   },

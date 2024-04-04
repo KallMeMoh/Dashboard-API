@@ -25,7 +25,8 @@ const Routes = require("./Routes");
 
 app.use("/api/v1", Routes);
 
-app.listen(5000, (err) => {
+const { port } = require('./config.js');
+app.listen(port, (err) => {
   if (err) console.error(err);
   console.log("Server is up and running on port 5000");
 });
