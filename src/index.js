@@ -29,3 +29,5 @@ app.listen(5000, (err) => {
   if (err) console.error(err);
   console.log("Server is up and running on port 5000");
 });
+
+module.exports = app;
