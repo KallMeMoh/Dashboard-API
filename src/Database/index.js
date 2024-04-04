@@ -1,8 +1,5 @@
-const { Schema, model, connect } = require("mongoose");
-const { mongoose } = require("../config.js");
+const { Schema, model } = require("mongoose");
 const bcrypt = require('bcrypt');
-
-connect(mongoose.URI);
 
 const userSchema = new Schema({
   username: {

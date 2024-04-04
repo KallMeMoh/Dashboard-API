@@ -1,10 +1,15 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const morgan = require('morgan');
 const helmet = require('helmet');
 
 const app = express();
+
+mongoose.connect(mongoose.URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
 
 const corsOptions = {
   // origin: "https://"
