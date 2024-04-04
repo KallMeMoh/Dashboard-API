@@ -75,5 +75,5 @@ module.exports = {
   User: model("User", userSchema),
   Category: model("Category", categorySchema),
   Product: model("Product", productSchema),
-  RefreshToken: model("RefreshToken", tokenSchema),
+  Token: model("Token", tokenSchema),
 };
