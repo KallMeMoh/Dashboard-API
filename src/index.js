@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const morgan = require('morgan');
+const helmet = require('helmet');
 
 const app = express();
 
@@ -20,6 +22,8 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use(helmet());
+app.use(morgan('combined'));
 
 const Routes = require("./Routes");
 

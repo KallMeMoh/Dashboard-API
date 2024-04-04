@@ -17,12 +17,16 @@ const userSchema = new Schema({
   },
 });
 
-const refreshTokenSchema = new Schema({
+const tokenSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     required: true,
   },
-  token: {
+  accessToken: {
+    type: String,
+    required: true,
+  },
+  refreshToken: {
     type: String,
     required: true,
   },
@@ -71,5 +75,5 @@ module.exports = {
   User: model("User", userSchema),
   Category: model("Category", categorySchema),
   Product: model("Product", productSchema),
-  RefreshToken: model("RefreshToken", refreshTokenSchema),
+  RefreshToken: model("RefreshToken", tokenSchema),
 };

@@ -7,7 +7,7 @@ const config = require("../../config.js");
 
 const router = express.Router();
 
-const { User, RefreshToken } = require("../../Database/index.js");
+const { User, Token } = require("../../Database/index.js");
 
 const generateAccessToken = (userId) => {
   return jwt.sign({ userId }, config.jwt.accessSecret, {
@@ -27,9 +27,9 @@ router.post(
     body("username")
       .isLength({ min: 5 })
       .withMessage("Username must be at least 5 characters long"),
-    body("password")
-      .isLength({ min: 8 })
-      .withMessage("Password must be at least 8 characters long"),
+    body('password')
+      .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)
+      .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number, and be at least 8 characters long')
   ],
   async (req, res) => {
     try {
@@ -49,16 +49,23 @@ router.post(
       const accessToken = generateAccessToken(user._id);
       const refreshToken = generateRefreshToken(user._id);
 
-      const refreshTokenDoc = new RefreshToken({
+      const tokenDoc = new Token({
         userId: user._id,
-        token: refreshToken,
+        accessToken,
+        refreshToken,
       });
-      await refreshTokenDoc.save();
+      await tokenDoc.save();
 
       res.status(200).json({ accessToken, refreshToken });
     } catch (error) {
-      res.status(400).send({ error: "err" });
-      console.log(error);
+      console.error(error); // Log the error for debugging
+      if (error.message === 'Invalid username or password') {
+        res.status(401).json({ message: error.message });
+      } else if (error.name === 'ValidationError') {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'Internal server error' });
+      }
     }
   },
 );
@@ -67,7 +74,9 @@ router.post(
   "/login",
   [
     body("username").exists().withMessage("Username is required"),
-    body("password").exists().withMessage("Password is required"),
+    body('password')
+      .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)
+      .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number, and be at least 8 characters long')
   ],
   async (req, res) => {
     try {
@@ -85,18 +94,25 @@ router.post(
       if (!isMatch) throw new Error("Invalid username or password");
 
       const accessToken = generateAccessToken(user._id);
-      const refreshTokenString = generateRefreshToken(user._id);
+      const refreshToken = generateRefreshToken(user._id);
 
-      const refreshToken = new RefreshToken({
+      const tokenDoc = new Token({
         userId: user._id,
-        token: refreshTokenString,
-        expiry: Date.now() + ms(config.jwt.refreshTokenExpiry),
+        accessToken,
+        refreshToken,
       });
-      await refreshToken.save();
+      await tokenDoc.save();
 
       res.status(200).json({ accessToken, refreshToken });
     } catch (error) {
-      res.status(400).send(error.message);
+      console.error(error); // Log the error for debugging
+      if (error.message === 'Invalid username or password') {
+        res.status(401).json({ message: error.message });
+      } else if (error.name === 'ValidationError') {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'Internal server error' });
+      }
     }
   },
 );
@@ -117,18 +133,18 @@ router.post("/refresh-token", async (req, res) => {
   try {
     const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret);
 
-    const refreshTokenDoc = await RefreshToken.findOne({
+    const tokenDoc = await Token.findOne({
       userId: decoded.userId,
+      refreshToken,
     });
-    if (!refreshTokenDoc)
+    if (!tokenDoc)
       return res.status(401).json({ message: "Invalid refresh token" });
 
-    if (refreshToken !== refreshTokenDoc.token)
-      return res.status(401).json({ message: "Invalid refresh token" });
+    const accessToken = generateAccessToken(decoded.userId);
+    tokenDoc.accessToken = accessToken;
+    await tokenDoc.save();
 
-    const newAccessToken = generateAccessToken(decoded.userId);
-
-    res.status(200).json({ accessToken: newAccessToken });
+    res.status(200).json({ accessToken });
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       await RefreshToken.deleteOne({ token: refreshToken });
@@ -150,17 +166,17 @@ router.post("/logout", async (req, res) => {
       .status(401)
       .json({ message: "Missing or malformed authorization header" });
 
-  const refreshToken = authHeader.split(" ")[1];
+  const accessToken = authHeader.split(" ")[1];
   
-  if (!refreshToken)
-    return res.status(401).json({ message: "Missing refresh token" });
+  if (!accessToken)
+    return res.status(401).json({ message: "Missing access token" });
 
   try {
-    // Delete the refresh token directly
-    const result = await RefreshToken.deleteOne({ token: refreshToken });
+    // Delete the token directly
+    const result = await Token.deleteOne({ accessToken });
 
     if (result.deletedCount === 0) {
-      return res.status(401).json({ message: "Invalid refresh token" });
+      return res.status(401).json({ message: "Invalid access token" });
     }
 
     res.json({ message: "Logged out successfully" });
