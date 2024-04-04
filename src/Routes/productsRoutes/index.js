@@ -35,12 +35,14 @@ router.get("/", async (req, res) => {
   const products = await Product.find();
 
   res.status(200).send({ products: products });
-  // GET /products: Retrieves a list of all products.
 });
 
-router.get("/:id", (req, res) => {
-  // GET /api/v1/products/:id
-  // GET /products/:id: Retrieves a specific product by ID.
+router.get("/:id", async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    return res.status(404).send({ message: "Product not found" });
+  }
+  res.status(200).send({ product });
 });
 
 // PROTECTED PRODUCTS ROUTES
@@ -51,16 +53,26 @@ NOTE FOR ME:
   user is still valid and has not been deleted from the database after
   the token was issued.
 */
-router.post("/", authenticateJWT, (req, res) => {
-  // POST /products: Creates a new product (requires authentication for admin users).
+router.post("/", authenticateJWT, async (req, res) => {
+  const newProduct = new Product(req.body);
+  const savedProduct = await newProduct.save();
+  res.status(201).send({ product: savedProduct });
 });
 
-router.put("/:id", authenticateJWT, (req, res) => {
-  // PUT /products/:id: Updates an existing product (requires authentication for admin users).
+router.put("/:id", authenticateJWT, async (req, res) => {
+  const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (!updatedProduct) {
+    return res.status(404).send({ message: "Product not found" });
+  }
+  res.status(200).send({ product: updatedProduct });
 });
 
-router.delete("/:id", authenticateJWT, (req, res) => {
-  // DELETE /products/:id: Deletes a product (requires authentication for admin users).
+router.delete("/:id", authenticateJWT, async (req, res) => {
+  const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+  if (!deletedProduct) {
+    return res.status(404).send({ message: "Product not found" });
+  }
+  res.status(200).send({ message: "Product deleted" });
 });
 
 module.exports = router;
