@@ -47,14 +47,13 @@ router.post(
       await user.save();
 
       const accessToken = generateAccessToken(user._id);
-      const refreshTokenString = generateRefreshToken(user._id);
+      const refreshToken = generateRefreshToken(user._id);
 
-      const refreshToken = new RefreshToken({
+      const refreshTokenDoc = new RefreshToken({
         userId: user._id,
-        token: refreshTokenString,
-        expiry: Date.now() + ms(config.jwt.refreshTokenExpiry),
+        token: refreshToken,
       });
-      await refreshToken.save();
+      await refreshTokenDoc.save();
 
       res.status(200).json({ accessToken, refreshToken });
     } catch (error) {
