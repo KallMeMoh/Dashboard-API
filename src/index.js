@@ -4,7 +4,7 @@ const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const morgan = require('morgan');
 const helmet = require('helmet');
-const { mongooseURI } = require("../config.js");
+const { mongooseURI } = require("./config.js");
 
 const app = express();
 
