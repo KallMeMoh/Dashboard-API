@@ -8,7 +8,7 @@ const { mongooseURI } = require("./config.js");
 
 const app = express();
 
-mongoose.connect(mongoose.URI)
+mongoose.connect(mongooseURI)
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 
