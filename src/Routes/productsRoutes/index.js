@@ -8,22 +8,21 @@ const { User, Product } = require("../../Database/index.js");
 const authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer "))
-    return res
-      .status(401)
-      .json({ message: "Missing or malformed authorization header" });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Missing or malformed authorization header" });
+  }
 
-  const token = authHeader.split(" ")[1]; // Bearer <Token>
+  const token = authHeader.match(/Bearer (.*)/)[1];
 
   jwt.verify(token, config.jwt.accessSecret, async (err, user) => {
     if (err) {
-      return res.sendStatus(403);
+      return res.status(403).json({ message: "Invalid or expired token" });
     }
 
     const dbUser = await User.findById(user.userId);
 
     if (!dbUser) {
-      return res.sendStatus(401);
+      return res.status(404).json({ message: "User not found" });
     }
 
     req.user = user;
