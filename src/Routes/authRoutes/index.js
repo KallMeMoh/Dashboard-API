@@ -147,7 +147,7 @@ router.post("/refresh-token", async (req, res) => {
     res.status(200).json({ accessToken });
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      await RefreshToken.deleteOne({ token: refreshToken });
+      await Token.deleteOne({ refreshToken });
       res.status(401).json({ message: "Refresh token expired" });
     } else if (error instanceof jwt.JsonWebTokenError) {
       res.status(401).json({ message: "Invalid refresh token" });
