@@ -17,6 +17,7 @@ const userSchema = new Schema({
 const tokenSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
   },
   accessToken: {
@@ -30,12 +31,10 @@ const tokenSchema = new Schema({
 });
 
 const categorySchema = new Schema({
-  name: {
+  _id: {
     type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
+    required: true
+  }
 });
 
 const productSchema = new Schema({
@@ -54,10 +53,9 @@ const productSchema = new Schema({
     required: true,
   },
   category: {
-    type: Schema.Types.ObjectId,
-    ref: "Category",
+    type: String,
     required: true,
-  },
+  }
 });
 
 userSchema.pre('save', async function(next) {

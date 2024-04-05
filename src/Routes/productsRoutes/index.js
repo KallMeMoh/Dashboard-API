@@ -14,9 +14,13 @@ const authenticateJWT = (req, res, next) => {
 
   const token = authHeader.match(/Bearer (.*)/)[1];
 
+  if (!token) {
+    return res.status(401).json({ message: "Missing token in authorization header" });
+  }
+
   jwt.verify(token, config.jwt.accessSecret, async (err, user) => {
     if (err) {
-      return res.status(403).json({ message: "Invalid or expired token" });
+      return res.status(401).json({ message: "Invalid or expired token" });
     }
 
     const dbUser = await User.findById(user.userId);
@@ -45,17 +49,52 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", authenticateJWT, async (req, res) => {
-  const product = new Product(req.body);
-  await product.save();
-  res.status(201).send(product);
+  const { name, price, image, category } = req.body;
+
+  try {
+    const categoryExists = await Category.findById(category);
+    if (!categoryExists) {
+      return res.status(400).json({ message: "Category not found" });
+    }
+
+    const product = new Product({ name, price, image, category });
+    await product.save();
+
+    res.status(201).send(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Something went wrong' });
+  }
 });
 
 router.put("/:id", authenticateJWT, async (req, res) => {
-  const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  if (!product) {
-    return res.status(404).send({ message: "Product not found" });
+  const { name, price, image, category } = req.body;
+
+  try {
+    const categoryExists = await Category.findById(category);
+    if (!categoryExists) {
+      return res.status(400).json({ message: "Category not found" });
+    }
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { 
+        name, 
+        price, 
+        image, 
+        category 
+      },{ 
+        new: true
+      }
+    );
+    if (!product) {
+      return res.status(404).send({ message: "Product not found" });
+    }
+    res.status(200).send(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Something went wrong' });
   }
-  res.status(200).send(product);
 });
 
 router.delete("/:id", authenticateJWT, async (req, res) => {
