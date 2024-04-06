@@ -146,10 +146,12 @@ router.post('/refresh-token', async (req, res) => {
       return res.status(401).json({ message: 'Invalid refresh token' });
 
     const accessToken = generateAccessToken(decoded.userId);
+    const refreshToken = generateRefreshToken(decoded.userId);
     tokenDoc.accessToken = accessToken;
+    tokenDoc.refreshToken = refreshToken;
     await tokenDoc.save();
 
-    res.status(200).json({ accessToken });
+    res.status(200).json({ accessToken, refreshToken });
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       await Token.deleteOne({ refreshToken });
