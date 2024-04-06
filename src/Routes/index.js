@@ -1,9 +1,9 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
-const authRoutes = require("./authRoutes");
-const productsRoutes = require("./productsRoutes");
-const categoriesRoutes = require("./categoriesRoutes");
+const authRoutes = require('./authRoutes');
+const productsRoutes = require('./productsRoutes');
+const categoriesRoutes = require('./categoriesRoutes');
 
 function errorHandler(err, req, res, next) {
   console.error(err.message);
@@ -17,12 +17,12 @@ router.use((err, req, res, next) => {
   errorHandler(err, req, res, next);
 });
 
-router.use("/auth", authRoutes);
-router.use("/products", productsRoutes);
-router.use("/categories", categoriesRoutes); // wip
+router.use('/auth', authRoutes);
+router.use('/products', productsRoutes);
+router.use('/categories', categoriesRoutes);
 
-router.get("/", (req, res) => {
-  res.status(200).send({ version: "^1.0.0" });
+router.get('/', (req, res) => {
+  res.status(200).send({ version: '^1.0.0' });
 });
 
 module.exports = router;

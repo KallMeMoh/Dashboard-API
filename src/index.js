@@ -1,19 +1,15 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const rateLimit = require("express-rate-limit");
+const express = require('express');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const { mongooseURI } = require("./config.js");
+const connectDB = require('./Database/index.js');
 
 const app = express();
-
-mongoose.connect(mongooseURI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.log(err));
+connectDB();
 
 const corsOptions = {
-  // origin: "https://"
+  // origin: 'https://'
 };
 
 const limiter = rateLimit({
@@ -31,8 +27,8 @@ app.use(cors(corsOptions));
 app.use(helmet());
 app.use(morgan('combined'));
 
-const Routes = require("./Routes");
+const Routes = require('./Routes');
 
-app.use("/api/v1", Routes);
+app.use('/api/v1', Routes);
 
 module.exports = app;
