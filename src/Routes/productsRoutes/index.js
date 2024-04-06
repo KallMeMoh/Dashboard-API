@@ -28,7 +28,7 @@ const authenticateJWT = (req, res, next) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const dbToken = await Token.findOne({ user.userId });
+    const dbToken = await Token.findOne({ userId: user.userId });
     if (!dbToken) {
       return res.status(404).json({ message: 'Expired Token' });
     }
