@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../../config.js');
 const router = express.Router();
 
-const { User, Product, Token } = require('../../Database/schema.js');
+const { User, Product, Category, Token } = require('../../Database/schema.js');
 
 const authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
