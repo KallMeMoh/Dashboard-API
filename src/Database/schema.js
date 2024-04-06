@@ -28,7 +28,7 @@ const tokenSchema = new Schema({
     type: String,
     required: true,
   },
-}, { _id: false });
+});
 
 const categorySchema = new Schema({
   _id: {
