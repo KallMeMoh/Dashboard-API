@@ -23,14 +23,14 @@ const authenticateJWT = (req, res, next) => {
       return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
+    const dbToken = await Token.findOne({ userId: user.userId });
+    if (!dbToken) {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+
     const dbUser = await User.findById(user.userId);
     if (!dbUser) {
       return res.status(404).json({ message: 'User not found' });
-    }
-
-    const dbToken = await Token.findOne({ userId: user.userId });
-    if (!dbToken) {
-      return res.status(404).json({ message: 'Expired Token' });
     }
 
     req.user = user;
