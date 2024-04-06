@@ -93,10 +93,14 @@ router.post(
       const { username, password } = req.body;
       const user = await User.findOne({ username });
 
-      if (!user) throw new Error('Invalid username or password');
+      if (!user) {
+        return res.status(401).json({ message: 'User does not exist' });
+      }
 
       const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) throw new Error('Invalid username or password');
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid username or password' });
+      }
 
       const accessToken = generateAccessToken(user._id);
       const refreshToken = generateRefreshToken(user._id);
@@ -111,9 +115,7 @@ router.post(
       res.status(200).json({ accessToken, refreshToken });
     } catch (err) {
       console.error(err);
-      if (err.message === 'Invalid username or password') {
-        res.status(401).json({ message: err.message });
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         res.status(400).json({ message: err.message });
       } else {
         res.status(500).json({ message: 'Internal server error' });
