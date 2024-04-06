@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../../config.js');
 const router = express.Router();
 
-const { User, Product, Category } = require('../../Database/schema.js');
+const { User, Product, Category, Token } = require('../../Database/schema.js');
 
 const authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -24,9 +24,13 @@ const authenticateJWT = (req, res, next) => {
     }
 
     const dbUser = await User.findById(user.userId);
-
     if (!dbUser) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    const dbToken = await Token.findOne(user.userId);
+    if (!dbToken) {
+      return res.status(404).json({ message: 'Expired Token' });
     }
 
     req.user = user;
