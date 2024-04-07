@@ -9,7 +9,7 @@ const app = express();
 connectDB();
 
 const corsOptions = {
-  // origin: 'https://'
+  origin: 'https://www.aboelyazed.com'
 };
 
 const limiter = rateLimit({
