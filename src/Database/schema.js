@@ -1,5 +1,4 @@
 const { Schema, model } = require('mongoose');
-const bcrypt = require('bcrypt');
 
 const userSchema = new Schema({
   username: {
@@ -33,8 +32,8 @@ const tokenSchema = new Schema({
 const categorySchema = new Schema({
   _id: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const productSchema = new Schema({
@@ -55,7 +54,7 @@ const productSchema = new Schema({
   category: {
     type: String,
     required: true,
-  }
+  },
 });
 
 module.exports = {

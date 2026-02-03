@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors');
+// const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -8,9 +8,9 @@ const connectDB = require('./Database/index.js');
 const app = express();
 connectDB();
 
-const corsOptions = {
-  origin: 'https://www.aboelyazed.com'
-};
+// const corsOptions = {
+//   origin: '[REDACTED]',
+// };
 
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000,
@@ -23,12 +23,15 @@ const limiter = rateLimit({
 
 app.use(limiter);
 app.use(express.json());
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 app.use(helmet());
 app.use(morgan('combined'));
 
 const Routes = require('./Routes');
 
 app.use('/api/v1', Routes);
+app.get('/', (req, res) => {
+  res.status(200).send({ message: 'Hello, World' });
+});
 
 module.exports = app;
