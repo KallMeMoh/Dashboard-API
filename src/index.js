@@ -34,4 +34,12 @@ app.get('/', (req, res) => {
   res.status(200).send({ message: 'Hello, World' });
 });
 
+app.use((err, req, res, next) => {
+  console.error(err);
+  if (!err.statusCode) {
+    err.statusCode = 500;
+  }
+  res.status(err.statusCode).json({ message: err.message });
+});
+
 module.exports = app;

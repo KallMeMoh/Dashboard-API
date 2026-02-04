@@ -9,13 +9,17 @@ const authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Missing or malformed authorization header' });
+    return res
+      .status(401)
+      .json({ message: 'Missing or malformed authorization header' });
   }
 
   const token = authHeader.match(/Bearer (.*)/)[1];
 
   if (!token) {
-    return res.status(401).json({ message: 'Missing token in authorization header' });
+    return res
+      .status(401)
+      .json({ message: 'Missing token in authorization header' });
   }
 
   jwt.verify(token, config.jwt.accessSecret, async (err, user) => {
@@ -44,7 +48,7 @@ router.get('/', async (req, res) => {
 
     res.status(200).send({ products });
   } catch (err) {
-    console.error(err);
+    console.error({ err });
     res.status(500).send({ message: 'Internal Server Error' });
   }
 });
@@ -57,7 +61,7 @@ router.get('/:id', async (req, res) => {
     }
     res.status(200).send(product);
   } catch (err) {
-    console.error(err);
+    console.error({ err });
     res.status(500).send({ message: 'Internal Server Error' });
   }
 });
@@ -76,7 +80,7 @@ router.post('/', authenticateJWT, async (req, res) => {
 
     res.status(201).send(product);
   } catch (err) {
-    console.error(err);
+    console.error({ err });
     res.status(500).send({ message: 'Internal Server Error' });
   }
 });
@@ -92,21 +96,22 @@ router.put('/:id', authenticateJWT, async (req, res) => {
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      { 
-        name, 
-        price, 
-        image, 
-        category 
-      },{ 
-        new: true
-      }
+      {
+        name,
+        price,
+        image,
+        category,
+      },
+      {
+        new: true,
+      },
     );
     if (!product) {
       return res.status(404).send({ message: 'Product not found' });
     }
     res.status(200).send(product);
   } catch (err) {
-    console.error(err);
+    console.error({ err });
     res.status(500).send({ message: 'Internal Server Error' });
   }
 });
@@ -119,7 +124,7 @@ router.delete('/:id', authenticateJWT, async (req, res) => {
     }
     res.status(200).send({ message: 'Product deleted' });
   } catch (err) {
-    console.error(err);
+    console.error({ err });
     res.status(500).send({ message: 'Internal Server Error' });
   }
 });
